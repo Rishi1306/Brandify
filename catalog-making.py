@@ -151,11 +151,22 @@ def process_single_image(img_array, filename, logo_array, size_dict, settings):
         
         img_pil = Image.alpha_composite(img_pil.convert("RGBA"), watermark_overlay).convert("RGB")
     
-    # Convert back to OpenCV and add logo
-    img = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
-    img[y_offset:y_offset+logo_height, x_offset:x_offset+logo_width] = logo_resized
+    # # Convert back to OpenCV and add logo
+    # img = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
+    # img[y_offset:y_offset+logo_height, x_offset:x_offset+logo_width] = logo_resized
     
+    # return img, design_number, size_raw
+
+        # Paste logo using PIL to preserve transparency
+    logo_pil = Image.fromarray(cv2.cvtColor(logo_resized, cv2.COLOR_BGR2RGB)).convert("RGBA")
+    img_pil = img_pil.convert("RGBA")
+    img_pil.paste(logo_pil, (x_offset, y_offset), logo_pil)
+
+    # Convert final back to OpenCV
+    img = cv2.cvtColor(np.array(img_pil.convert("RGB")), cv2.COLOR_RGB2BGR)
+
     return img, design_number, size_raw
+
 
 def convert_to_webp_bytes(img_array, quality=90):
     """Convert image array to WebP bytes"""
